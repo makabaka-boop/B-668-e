@@ -1,0 +1,32 @@
+services:
+  backend-test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    environment:
+      - SPRING_PROFILES_ACTIVE=test
+      - DB_URL=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+      - DB_USERNAME=sa
+      - DB_PASSWORD=
+      - JWT_SECRET=test-secret-key-for-testing-only-please-change-in-production
+    volumes:
+      - ./backend/target/surefire-reports:/app/target/surefire-reports
+      - ./backend/target/site:/app/target/site
+    networks:
+      - test-network
+
+  frontend-test:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.test
+    volumes:
+      - ./frontend/test-results:/app/test-results
+      - ./frontend/coverage:/app/coverage
+    networks:
+      - test-network
+    depends_on:
+      - backend-test
+
+networks:
+  test-network:
+    driver: bridge
