@@ -1,0 +1,65 @@
+services:
+  backend-test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    container_name: lms-backend-test
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_NAME: testdb
+      DB_USERNAME: sa
+      DB_PASSWORD: ""
+      CURRENT_TERM: 2025-2026-1
+    volumes:
+      - backend-test-reports:/app/surefire-reports
+      - backend-test-site:/app/site
+    networks:
+      - test-network
+
+  frontend-test:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.test
+    container_name: lms-frontend-test
+    environment:
+      - NODE_ENV=test
+    volumes:
+      - frontend-test-reports:/app/coverage
+    networks:
+      - test-network
+    depends_on:
+      - backend-test
+
+  mysql:
+    image: mysql:8.0
+    container_name: lms-mysql-test
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: leave_manage
+      MYSQL_TZ: Asia/Shanghai
+      TZ: Asia/Shanghai
+    ports:
+      - '3307:3306'
+    volumes:
+      - mysql-test-data:/var/lib/mysql
+      - ./scripts:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h localhost -uroot -proot']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+volumes:
+  mysql-test-data:
+  backend-test-reports:
+  backend-test-site:
+  frontend-test-reports:
+
+networks:
+  test-network:
+    driver: bridge
