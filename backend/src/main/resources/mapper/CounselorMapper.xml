@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.lms.mapper.CounselorMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.lms.entity.Counselor">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password_hash" property="passwordHash"/>
+        <result column="name" property="name"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <!-- 根据ID查询辅导员 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM counselor WHERE id = #{id}
+    </select>
+
+    <!-- 根据用户名查询辅导员 -->
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT * FROM counselor WHERE username = #{username}
+    </select>
+
+    <!-- 插入辅导员 -->
+    <insert id="insert" parameterType="com.example.lms.entity.Counselor" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO counselor (username, password_hash, name, created_at)
+        VALUES (#{username}, #{passwordHash}, #{name}, #{createdAt})
+    </insert>
+
+    <!-- 更新辅导员 -->
+    <update id="update" parameterType="com.example.lms.entity.Counselor">
+        UPDATE counselor
+        SET username = #{username},
+            password_hash = #{passwordHash},
+            name = #{name}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除辅导员 -->
+    <delete id="deleteById">
+        DELETE FROM counselor WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.lms.mapper.LeaveRequestMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.lms.entity.LeaveRequest">
+        <id column="id" property="id"/>
+        <result column="student_id" property="studentId"/>
+        <result column="course_id" property="courseId"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="counselor_id" property="counselorId"/>
+        <result column="leave_date" property="leaveDate"/>
+        <result column="leave_type" property="leaveType"/>
+        <result column="status" property="status"/>
+        <result column="reason" property="reason"/>
+        <result column="attachment_url" property="attachmentUrl"/>
+        <result column="audit_remark" property="auditRemark"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="audited_at" property="auditedAt"/>
+    </resultMap>
+
+    <!-- 统计DTO结果映射 -->
+    <resultMap id="StatisticsResultMap" type="com.example.lms.dto.StatisticsDTO">
+        <result column="student_no" property="studentNo"/>
+        <result column="student_name" property="studentName"/>
+        <result column="leave_count" property="leaveCount"/>
+    </resultMap>
+
+    <!-- 根据ID查询请假申请 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM leave_request WHERE id = #{id}
+    </select>
+
+    <!-- 查询学生的请假记录（分页） -->
+    <select id="selectByStudent" resultMap="BaseResultMap">
+        SELECT * FROM leave_request
+        WHERE student_id = #{studentId}
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="dateFrom != null">
+            AND leave_date &gt;= #{dateFrom}
+        </if>
+        <if test="dateTo != null">
+            AND leave_date &lt;= #{dateTo}
+        </if>
+        ORDER BY created_at DESC
+        <if test="offset != null and limit != null">
+            LIMIT #{offset}, #{limit}
+        </if>
+    </select>
+
+    <!-- 统计学生的请假记录总数 -->
+    <select id="countByStudent" resultType="int">
+        SELECT COUNT(*) FROM leave_request
+        WHERE student_id = #{studentId}
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="dateFrom != null">
+            AND leave_date &gt;= #{dateFrom}
+        </if>
+        <if test="dateTo != null">
+            AND leave_date &lt;= #{dateTo}
+        </if>
+    </select>
+
+    <!-- 查询辅导员待审核的请假申请（分页） -->
+    <select id="selectPendingByCounselor" resultMap="BaseResultMap">
+        SELECT * FROM leave_request
+        WHERE counselor_id = #{counselorId}
+          AND status = 'PENDING'
+        ORDER BY created_at ASC
+        <if test="offset != null and limit != null">
+            LIMIT #{offset}, #{limit}
+        </if>
+    </select>
+
+    <!-- 统计辅导员待审核的请假申请总数 -->
+    <select id="countPendingByCounselor" resultType="int">
+        SELECT COUNT(*) FROM leave_request
+        WHERE counselor_id = #{counselorId}
+          AND status = 'PENDING'
+    </select>
+
+    <!-- 查询辅导员的请假记录（分页，支持多条件筛选） -->
+    <select id="selectByCounselor" resultMap="BaseResultMap">
+        SELECT lr.* FROM leave_request lr
+        INNER JOIN student s ON lr.student_id = s.id
+        WHERE lr.counselor_id = #{counselorId}
+        <if test="classId != null">
+            AND s.class_id = #{classId}
+        </if>
+        <if test="studentNo != null and studentNo != ''">
+            AND s.student_no = #{studentNo}
+        </if>
+        <if test="status != null and status != ''">
+            AND lr.status = #{status}
+        </if>
+        <if test="leaveType != null and leaveType != ''">
+            AND lr.leave_type = #{leaveType}
+        </if>
+        <if test="dateFrom != null">
+            AND lr.leave_date &gt;= #{dateFrom}
+        </if>
+        <if test="dateTo != null">
+            AND lr.leave_date &lt;= #{dateTo}
+        </if>
+        ORDER BY lr.id DESC
+        <if test="offset != null and limit != null">
+            LIMIT #{offset}, #{limit}
+        </if>
+    </select>
+
+    <!-- 统计辅导员的请假记录总数 -->
+    <select id="countByCounselor" resultType="int">
+        SELECT COUNT(*) FROM leave_request lr
+        INNER JOIN student s ON lr.student_id = s.id
+        WHERE lr.counselor_id = #{counselorId}
+        <if test="classId != null">
+            AND s.class_id = #{classId}
+        </if>
+        <if test="studentNo != null and studentNo != ''">
+            AND s.student_no = #{studentNo}
+        </if>
+        <if test="status != null and status != ''">
+            AND lr.status = #{status}
+        </if>
+        <if test="leaveType != null and leaveType != ''">
+            AND lr.leave_type = #{leaveType}
+        </if>
+        <if test="dateFrom != null">
+            AND lr.leave_date &gt;= #{dateFrom}
+        </if>
+        <if test="dateTo != null">
+            AND lr.leave_date &lt;= #{dateTo}
+        </if>
+    </select>
+
+    <!-- 查询教师课程的请假记录（分页） -->
+    <select id="selectByTeacher" resultMap="BaseResultMap">
+        SELECT * FROM leave_request
+        WHERE teacher_id = #{teacherId}
+        <if test="courseId != null">
+            AND course_id = #{courseId}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="dateFrom != null">
+            AND leave_date &gt;= #{dateFrom}
+        </if>
+        <if test="dateTo != null">
+            AND leave_date &lt;= #{dateTo}
+        </if>
+        ORDER BY leave_date DESC
+        <if test="offset != null and limit != null">
+            LIMIT #{offset}, #{limit}
+        </if>
+    </select>
+
+    <!-- 统计教师课程的请假记录总数 -->
+    <select id="countByTeacher" resultType="int">
+        SELECT COUNT(*) FROM leave_request
+        WHERE teacher_id = #{teacherId}
+        <if test="courseId != null">
+            AND course_id = #{courseId}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="dateFrom != null">
+            AND leave_date &gt;= #{dateFrom}
+        </if>
+        <if test="dateTo != null">
+            AND leave_date &lt;= #{dateTo}
+        </if>
+    </select>
+
+    <!-- 统计学生请假次数（按学生分组） -->
+    <select id="selectStatisticsByStudent" resultMap="StatisticsResultMap">
+        SELECT
+            s.student_no,
+            s.name AS student_name,
+            COUNT(*) AS leave_count
+        FROM leave_request lr
+        INNER JOIN student s ON lr.student_id = s.id
+        WHERE lr.counselor_id = #{counselorId}
+          AND lr.status = 'APPROVED'
+        <if test="classId != null">
+            AND s.class_id = #{classId}
+        </if>
+        <if test="dateFrom != null">
+            AND lr.leave_date &gt;= #{dateFrom}
+        </if>
+        <if test="dateTo != null">
+            AND lr.leave_date &lt;= #{dateTo}
+        </if>
+        GROUP BY s.id, s.student_no, s.name
+        ORDER BY leave_count DESC
+    </select>
+
+    <!-- 统计课程出勤情况（按学生分组） -->
+    <select id="selectAttendanceStatistics" resultMap="StatisticsResultMap">
+        SELECT
+            s.student_no,
+            s.name AS student_name,
+            COUNT(*) AS leave_count
+        FROM leave_request lr
+        INNER JOIN student s ON lr.student_id = s.id
+        WHERE lr.teacher_id = #{teacherId}
+          AND lr.status = 'APPROVED'
+        <if test="courseId != null">
+            AND lr.course_id = #{courseId}
+        </if>
+        <if test="dateFrom != null">
+            AND lr.leave_date &gt;= #{dateFrom}
+        </if>
+        <if test="dateTo != null">
+            AND lr.leave_date &lt;= #{dateTo}
+        </if>
+        GROUP BY s.id, s.student_no, s.name
+        ORDER BY leave_count DESC
+    </select>
+
+    <!-- 检查是否存在重复的请假申请 -->
+    <select id="countDuplicate" resultType="int">
+        SELECT COUNT(*) FROM leave_request
+        WHERE student_id = #{studentId}
+          AND course_id = #{courseId}
+          AND leave_date = #{leaveDate}
+    </select>
+
+    <!-- 插入请假申请 -->
+    <insert id="insert" parameterType="com.example.lms.entity.LeaveRequest" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO leave_request (
+            student_id, course_id, teacher_id, counselor_id,
+            leave_date, leave_type, status, reason, attachment_url, created_at
+        ) VALUES (
+            #{studentId}, #{courseId}, #{teacherId}, #{counselorId},
+            #{leaveDate}, #{leaveType}, #{status}, #{reason}, #{attachmentUrl}, #{createdAt}
+        )
+    </insert>
+
+    <!-- 更新请假申请 -->
+    <update id="update" parameterType="com.example.lms.entity.LeaveRequest">
+        UPDATE leave_request
+        SET status = #{status},
+            audit_remark = #{auditRemark},
+            audited_at = #{auditedAt}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除请假申请 -->
+    <delete id="deleteById">
+        DELETE FROM leave_request WHERE id = #{id}
+    </delete>
+
+</mapper>

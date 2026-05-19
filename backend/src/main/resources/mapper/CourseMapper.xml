@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.lms.mapper.CourseMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.lms.entity.Course">
+        <id column="id" property="id"/>
+        <result column="course_name" property="courseName"/>
+        <result column="weekday" property="weekday"/>
+        <result column="period" property="period"/>
+        <result column="term" property="term"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <!-- 根据ID查询课程 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM course WHERE id = #{id}
+    </select>
+
+    <!-- 插入课程 -->
+    <insert id="insert" parameterType="com.example.lms.entity.Course" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO course (course_name, weekday, period, term, created_at)
+        VALUES (#{courseName}, #{weekday}, #{period}, #{term}, #{createdAt})
+    </insert>
+
+    <!-- 更新课程 -->
+    <update id="update" parameterType="com.example.lms.entity.Course">
+        UPDATE course
+        SET course_name = #{courseName},
+            weekday = #{weekday},
+            period = #{period},
+            term = #{term}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除课程 -->
+    <delete id="deleteById">
+        DELETE FROM course WHERE id = #{id}
+    </delete>
+
+</mapper>

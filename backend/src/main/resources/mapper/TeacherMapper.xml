@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.lms.mapper.TeacherMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.lms.entity.Teacher">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password_hash" property="passwordHash"/>
+        <result column="name" property="name"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <!-- 根据ID查询教师 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM teacher WHERE id = #{id}
+    </select>
+
+    <!-- 根据用户名查询教师 -->
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT * FROM teacher WHERE username = #{username}
+    </select>
+
+    <!-- 插入教师 -->
+    <insert id="insert" parameterType="com.example.lms.entity.Teacher" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO teacher (username, password_hash, name, created_at)
+        VALUES (#{username}, #{passwordHash}, #{name}, #{createdAt})
+    </insert>
+
+    <!-- 更新教师 -->
+    <update id="update" parameterType="com.example.lms.entity.Teacher">
+        UPDATE teacher
+        SET username = #{username},
+            password_hash = #{passwordHash},
+            name = #{name}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除教师 -->
+    <delete id="deleteById">
+        DELETE FROM teacher WHERE id = #{id}
+    </delete>
+
+</mapper>

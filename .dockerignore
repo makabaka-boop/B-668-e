@@ -1,0 +1,10 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!target/*.jar
+*.wrapper
+.git/
+.gitignore
+frontend/node_modules/
+frontend/dist/
+.idea/
+*.iml

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.lms.mapper.EnrollmentMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.example.lms.entity.Enrollment">
+        <id column="id" property="id"/>
+        <result column="student_id" property="studentId"/>
+        <result column="course_id" property="courseId"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="term" property="term"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <!-- 课程信息DTO结果映射 -->
+    <resultMap id="CourseWithTeacherResultMap" type="com.example.lms.dto.CourseWithTeacherDTO">
+        <result column="course_id" property="courseId"/>
+        <result column="course_name" property="courseName"/>
+        <result column="weekday" property="weekday"/>
+        <result column="period" property="period"/>
+        <result column="term" property="term"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="teacher_name" property="teacherName"/>
+    </resultMap>
+
+    <!-- 根据ID查询选课记录 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM enrollment WHERE id = #{id}
+    </select>
+
+    <!-- 查询学生的课程列表（含教师信息） -->
+    <select id="selectStudentCourses" resultMap="CourseWithTeacherResultMap">
+        SELECT
+            c.id AS course_id,
+            c.course_name,
+            c.weekday,
+            c.period,
+            c.term,
+            t.id AS teacher_id,
+            t.name AS teacher_name
+        FROM enrollment e
+        INNER JOIN course c ON e.course_id = c.id
+        INNER JOIN teacher t ON e.teacher_id = t.id
+        WHERE e.student_id = #{studentId}
+        <if test="term != null and term != ''">
+            AND e.term = #{term}
+        </if>
+        ORDER BY c.weekday, c.period
+    </select>
+
+    <!-- 查询教师的课程列表 -->
+    <select id="selectTeacherCourses" resultMap="CourseWithTeacherResultMap">
+        SELECT DISTINCT
+            c.id AS course_id,
+            c.course_name,
+            c.weekday,
+            c.period,
+            c.term,
+            #{teacherId} AS teacher_id,
+            t.name AS teacher_name
+        FROM course_teacher ct
+        INNER JOIN course c ON ct.course_id = c.id
+        INNER JOIN teacher t ON ct.teacher_id = t.id
+        WHERE ct.teacher_id = #{teacherId}
+        <if test="term != null and term != ''">
+            AND c.term = #{term}
+        </if>
+        ORDER BY c.weekday, c.period
+    </select>
+
+    <!-- 根据学生ID、课程ID和学期查询选课记录 -->
+    <select id="selectByStudentAndCourse" resultMap="BaseResultMap">
+        SELECT * FROM enrollment
+        WHERE student_id = #{studentId}
+          AND course_id = #{courseId}
+          AND term = #{term}
+    </select>
+
+    <!-- 插入选课记录 -->
+    <insert id="insert" parameterType="com.example.lms.entity.Enrollment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO enrollment (student_id, course_id, teacher_id, term, created_at)
+        VALUES (#{studentId}, #{courseId}, #{teacherId}, #{term}, #{createdAt})
+    </insert>
+
+    <!-- 删除选课记录 -->
+    <delete id="deleteById">
+        DELETE FROM enrollment WHERE id = #{id}
+    </delete>
+
+</mapper>
