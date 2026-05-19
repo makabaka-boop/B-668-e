@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: leave-management-system-test
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-test.sql
+      data-locations: classpath:data-test.sql
+  h2:
+    console:
+      enabled: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.example.lms.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+server:
+  port: 8081
+
+lms:
+  current-term: 2025-2026-1
+
+file:
+  upload:
+    path: build/uploads/
+    base-url: /uploads/
+
+logging:
+  level:
+    com.example.lms: DEBUG
+    com.example.lms.mapper: DEBUG

@@ -671,9 +671,121 @@ npm run build
 
 本项目仅用于学习和教学目的。
 
-## 联系方式
+## 自动化测试
 
-如有问题，请提交 Issue 或联系开发团队。
+### 测试概览
+
+本项目提供完整的自动化测试覆盖，包括：
+
+**后端测试（JUnit 5 + MockMVC + H2）**
+- 登录鉴权：多角色登录（学生/教师/辅导员）、密码错误、用户不存在、Token验证、登出
+- 学生请假申请：课程列表查询、提交请假申请、请假日期校验、重复提交校验、请假记录查询、详情查询、越权访问
+- 辅导员审核：待审核列表查询、审核通过/拒绝、已审核不可重复审核、越权审核、请假记录查询、统计查询
+- 教师查看与统计：课程列表查询、请假列表查询、出勤统计
+- 异常处理：参数校验、业务异常、404、全局异常处理
+- 权限拦截：无Token访问、无效Token、角色越权访问
+
+**前端测试（Vitest + Vue Test Utils）**
+- 登录页：表单渲染、测试账号填充、按钮交互、loading状态
+- 路由守卫：未登录访问保护、已登录路由放行、登录页免守卫
+- 请求封装：BaseURL配置、Token自动注入、响应拦截、错误处理、Token清理
+
+### 运行测试
+
+#### 后端测试
+
+```bash
+cd backend
+mvn test
+```
+
+或通过 Docker：
+
+```bash
+docker compose -f docker-compose.test.yml up backend-test --build
+```
+
+#### 前端测试
+
+```bash
+cd frontend
+npm run test
+```
+
+或通过 Docker：
+
+```bash
+docker compose -f docker-compose.test.yml up frontend-test --build
+```
+
+#### 一键运行所有测试（Docker）
+
+```bash
+docker compose -f docker-compose.test.yml up --build
+```
+
+### 测试配置说明
+
+| 配置项 | 说明 |
+| --- | --- |
+| 后端数据库 | H2 内存数据库，独立 schema-test.sql 和 data-test.sql |
+| 后端配置 | application-test.yml，使用 test profile |
+| 前端测试环境 | happy-dom 模拟浏览器环境 |
+| 前端测试框架 | Vitest + @vue/test-utils |
+| 测试报告 | 后端: surefire-reports/, 前端: coverage/ |
+
+### 测试账号（与正常运行环境一致）
+
+| 角色 | 账号 | 密码 | 说明 |
+| --- | --- | --- | --- |
+| 辅导员 | counselor1 | 123456 | 负责计算机2021级1班、2班 |
+| 辅导员 | counselor2 | 123456 | 负责软件工程2021级1班 |
+| 教师 | teacher1 | 123456 | 教数据库原理、计算机网络 |
+| 教师 | teacher2 | 123456 | 教操作系统、算法设计 |
+| 教师 | teacher3 | 123456 | 教计算机网络、软件工程 |
+| 学生 | student1~student8 | 123456 | 8名测试学生 |
+
+### 测试文件清单
+
+```
+backend/src/test/
+  ├── resources/
+  │   ├── application-test.yml    # 测试配置
+  │   ├── schema-test.sql         # H2测试表结构
+  │   └── data-test.sql           # H2测试数据
+  └── java/com/example/lms/test/
+      └── controller/
+          ├── AuthControllerIntegrationTest.java       # 登录鉴权测试
+          ├── StudentControllerIntegrationTest.java    # 学生请假申请测试
+          ├── CounselorControllerIntegrationTest.java  # 辅导员审核测试
+          ├── TeacherControllerIntegrationTest.java   # 教师查看统计测试
+          ├── AuthInterceptorIntegrationTest.java     # 权限拦截测试
+          └── GlobalExceptionHandlerIntegrationTest.java # 异常处理测试
+
+frontend/tests/
+  ├── setup.js        # 测试初始化与 mock
+  ├── Login.spec.js   # 登录页测试
+  ├── router.spec.js  # 路由守卫测试
+  └── request.spec.js # 请求封装测试
+
+backend/Dockerfile.test    # 后端测试 Dockerfile
+frontend/Dockerfile.test   # 前端测试 Dockerfile
+docker-compose.test.yml    # Docker测试编排
+```
+
+### 常见测试问题
+
+**1. 后端测试启动失败**
+- 检查 JDK 17+ 是否安装
+- 检查 Maven 依赖是否完整下载
+
+**2. 前端测试启动失败**
+- 检查 Node.js 18+ 是否安装
+- 运行 `npm install` 安装测试依赖
+
+**3. Docker 测试容器启动慢**
+- 首次启动需下载镜像和依赖，后续会缓存
+- 可通过 `docker compose -f docker-compose.test.yml logs -f` 查看实时日志
 
 ---
 

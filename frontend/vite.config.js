@@ -15,5 +15,15 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  test: {
+    environment: 'happy-dom',
+    globals: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      include: ['src/**/*.{js,vue}'],
+      exclude: ['src/main.js', 'src/**/*.config.js']
+    }
   }
 })
