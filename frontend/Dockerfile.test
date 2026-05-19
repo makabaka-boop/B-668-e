@@ -1,0 +1,12 @@
+FROM node:20.10.0-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+
+RUN npm run test -- --reporter=default --reporter=junit --outputFile=./test-results/results.xml
+
+CMD ["tail", "-f", "/dev/null"]

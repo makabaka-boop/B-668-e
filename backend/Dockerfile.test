@@ -1,0 +1,12 @@
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
+
+WORKDIR /app
+
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+COPY src ./src
+
+RUN mvn test -Dtest=**/*Test -DfailIfNoTests=false -Dspring.profiles.active=test
+
+CMD ["tail", "-f", "/dev/null"]
